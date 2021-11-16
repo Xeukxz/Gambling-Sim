@@ -1,7 +1,8 @@
 * {
-  
   margin: 0px;
-  font-size: 10px;
+  font-size: 20px;
+  font-family: monospace;
+  color: white;
 }
 
 body {
@@ -13,4 +14,75 @@ canvas {
   left: 100px;
   top: 100px;
   border: 3px solid rgb(0, 0, 0);
+}
+
+#log {
+  position: relative;
+  width: 706px;
+  height: 606px;
+  background-color: rgb(29, 29, 29);
+  left: 810px;
+  top: 100px;
+  overflow-y: scroll;
+}
+
+#logValue {
+  display: flex;
+  justify-content: space-around;
+}
+
+.logValueVal {
+  position: relative;
+  float: left;
+  width: 33.3333333%;
+  padding: 0 5px 0 5px;
+}
+
+/* width */
+*::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+*::-webkit-scrollbar-track {
+  background: #00000000;
+}
+
+/* Handle */
+*::-webkit-scrollbar-thumb {
+  background: rgb(53, 53, 53);
+}
+
+/* Handle on hover */
+*::-webkit-scrollbar-thumb:hover {
+  background: rgb(61, 61, 61);
+}
+/* width */
+span::-webkit-scrollbar {
+  display: none;
+  height: 4px;
+}
+
+/* Track */
+span::-webkit-scrollbar-track {
+  display: none;
+  background: #00000000;
+}
+
+/* Handle */
+span::-webkit-scrollbar-thumb {
+  display: none;
+  background: rgb(53, 53, 53);
+}
+
+/* Handle on hover */
+span::-webkit-scrollbar-thumb:hover {
+  display: none;
+  background: rgb(61, 61, 61);
+}
+
+span {
+  white-space: nowrap;
+  overflow-x: scroll;
+  /* color: inherit */
 }

@@ -1,2 +1,2 @@
 # Gambling-Sim
-Simple simulation for testing gambling strategies
+Simple simulation used to test gambling strategies

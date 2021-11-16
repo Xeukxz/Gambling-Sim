@@ -56,15 +56,25 @@ $(() => {
       betcount = 0,
       bals = [],
       highest = 100,
-      loseStreak = 0
+      loseStreak = 0,
+      lastbal = 100,
+      wlc = 'white'
 
     let slowbetloop = setInterval(() => {
       answer = Math.floor(Math.random() * 2) + 1
       betcount++
+      lastbal = bal
 
       bals.push(bal)
+      
+     /*  if(bet != 0) bet = bal * 0.02 */
+
+      bal -= bet
+      plotPoints(bals, highest)
 
       if (answer == 1) {
+        wlc = 'lime'
+        lastbal -= bet
         loseStreak = 0
         wins++
         bal += bet * 2
@@ -77,35 +87,84 @@ $(() => {
         } */
 
         bet = bal * 0.02
+        /* bal = Math.round(bal)
+        bet = Math.round(bet) */
         /* bal -= bet */
         wlr = wins / losses
         console.log(`${betcount}, ${answer}, ${bet}, ${bal}, ${wins}, ${losses}, ${wlr}, ${highest}`)
       } else {
+        wlc = 'red'
+        console.log(lastbal, bal, lastbal-bal)
         losses++
         /* if (loseStreak > 0) bet *= loseStreak / 100
-        else  */bet *= 3
-        bal -= bet
+        else  */
+        bet *= 3
         loseStreak++
         console.log(`${betcount}, ${answer}, ${bet}, ${bal}, ${wins}, ${losses}, ${wlr}, ${highest}, ${wallet}`)
       }
+
+      bal *= 100
+      bal = Math.round(bal)
+      bal /= 100
+
+      bet *= 100
+      bet = Math.round(bet)
+      bet /= 100
+
+      profit = bal - lastbal
+
+      profit *= 100
+      profit = Math.round(profit)
+      profit /= 100
+
+      console.log(lastbal, bal, lastbal-bal)
+
+      if(bet != 0) $('#log').append(`
+      <p id="logValue" style="color:${wlc}">
+        <span style="width:60px;padding-right:10px;text-align:center;">${betcount}</span>
+        <span class="logValueVal">
+          Bal: ${bal}
+        </span>
+        <span class="logValueVal">
+          Bet: ${bet}
+        </span>
+        <span class="logValueVal" style="color:${wlc}">
+          Profit: ${profit}
+        </span>
+      </p>
+      `)
+
+      
 
       if (bal > highest) highest = bal
 
       if (bal <= 0) {
         bals.push(bal)
-        clearInterval(slowbetloop)
+        clearInterval(slowbetloop)      
+        $('#log').append(`
+          <p id="logValue">
+            <span class="logValueVal" style="color:lime">
+              Highest Bal: ${highest}
+            </span>
+          </p>
+      `)
       }
 
       /* console.log(`${betcount}, ${answer}, ${bet}, ${bal}, ${wins}, ${losses}, ${wlr}, ${highest}`) */
-      plotPoints(bals, highest)
+      if(bet != 0) plotPoints(bals, highest)
       displayAxis()
+      //var element = document.getElementById("yourDivID");
+      $('#log')[0].scrollTop = $('#log')[0].scrollHeight;
 
-    }, 100);
+    }, 1);
     console.log(`${betcount}, ${answer}, ${bet}, ${bal}, ${wins}, ${losses}, ${wlr}, ${highest}`)
-    plotPoints(bals, highest)
+    if(bet != 0) plotPoints(bals, highest)
     displayAxis()
   }
 
+  function sexyData() {
+    
+  }
 /*   setInterval(() => {
     while (!loopy) {
       slowBet()
@@ -118,7 +177,6 @@ $(() => {
   slowBet()
 
   
-
 
 
 
