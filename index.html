@@ -8,10 +8,33 @@
 </head>
 
 <body>
-
-  <canvas id="myCanvas"></canvas>
-  <div id="log">
-<!--     <p id="logValue">
+  <div id="roundingPopup">
+    <p style="margin: 20px;">Select A Rounding Value</p>
+    <br>
+    <div id="roundingVals">
+      <p><span id="round0">0</span><span id="round1">1</span></p>
+      <p><span id="round2">2</span><span id="round3">3</span></p>
+      <p><span id="round4">4</span><span id="round5">5</span></p>
+    </div>
+    <span id="closeRounding">Exit</span>
+  </div>
+    <div id="message">
+    <p></p>
+    </div>
+  <div id="stats">
+    <div id="options">
+      <div id="option-run" class="option"><span style="position:relative;float:left;left:50%;top:50%;transform:translate(-50%, -50%);padding:20px;">Run Simulation</span></div>
+      <div id="option-color" class="option"><span style="position:relative;float:left;left:50%;top:50%;transform:translate(-50%, -50%);padding:20px;">Toggle Profit<br>Colors</span></div>
+      <div id="option-round" class="option"><span style="position:relative;float:left;left:50%;top:50%;transform:translate(-50%, -50%);padding:20px;">Set Rounding</span></div>
+      <div id="option-modes" class="option"><span style="position:relative;float:left;left:50%;top:50%;transform:translate(-50%, -50%);padding:20px;">Change Mode</span></div>
+      <div id="option-info" class="option"><span style="position:relative;float:left;left:50%;top:50%;transform:translate(-50%, -50%);padding:20px;">Information</span></div>
+    </div>
+      
+    <div class="split" style="height: 4px;"></div>
+    <canvas id="myCanvas"></canvas>
+    <div class="split" style="width: 4px;float: left;height: 600px"></div>
+    <div id="log">
+      <!--     <p id="logValue">
       <span class="logValueVal">
         Bal: 100
       </span>
@@ -22,7 +45,9 @@
         Profit: 0
       </span>
     </p> -->
+    </div>
   </div>
+
 
 </body>
 

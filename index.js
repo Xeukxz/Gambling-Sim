@@ -3,6 +3,9 @@ $(() => {
   myCanvas.height = 600;
   var c = document.getElementById("myCanvas");
   var ctx = c.getContext("2d");
+  let profitColors = 1,
+    roundingExponent = 2,
+    roundingWindowClosed = true
 
   function displayAxis() {
     ctx.strokeStyle = 'black'
@@ -48,6 +51,8 @@ $(() => {
 
   function slowBet() {
 
+    $('#log').html("")
+
     let bal = 100,
       bet = 0,
       wins = 0,
@@ -66,8 +71,8 @@ $(() => {
       lastbal = bal
 
       bals.push(bal)
-      
-     /*  if(bet != 0) bet = bal * 0.02 */
+
+      /*  if(bet != 0) bet = bal * 0.02 */
 
       bal -= bet
       plotPoints(bals, highest)
@@ -79,12 +84,12 @@ $(() => {
         wins++
         bal += bet * 2
 
-/*         if (bal > 200) {
-          wallet += bal - 100
-          bal = 100
-          loopy = false
-          clearInterval(slowbetloop)
-        } */
+        /*         if (bal > 200) {
+                  wallet += bal - 100
+                  bal = 100
+                  loopy = false
+                  clearInterval(slowbetloop)
+                } */
 
         bet = bal * 0.02
         /* bal = Math.round(bal)
@@ -94,7 +99,7 @@ $(() => {
         console.log(`${betcount}, ${answer}, ${bet}, ${bal}, ${wins}, ${losses}, ${wlr}, ${highest}`)
       } else {
         wlc = 'red'
-        console.log(lastbal, bal, lastbal-bal)
+        console.log(lastbal, bal, lastbal - bal)
         losses++
         /* if (loseStreak > 0) bet *= loseStreak / 100
         else  */
@@ -103,91 +108,172 @@ $(() => {
         console.log(`${betcount}, ${answer}, ${bet}, ${bal}, ${wins}, ${losses}, ${wlr}, ${highest}, ${wallet}`)
       }
 
-      bal *= 100
+      bal *= 10 ** roundingExponent
       bal = Math.round(bal)
-      bal /= 100
+      bal /= 10 ** roundingExponent
 
-      bet *= 100
+      bet *= 10 ** roundingExponent
       bet = Math.round(bet)
-      bet /= 100
+      bet /= 10 ** roundingExponent
 
       profit = bal - lastbal
 
-      profit *= 100
+      profit *= 10 ** roundingExponent
       profit = Math.round(profit)
-      profit /= 100
+      profit /= 10 ** roundingExponent
 
-      console.log(lastbal, bal, lastbal-bal)
+      console.log(lastbal, bal, lastbal - bal)
 
-      if(bet != 0) $('#log').append(`
+      if (bet != 0) $('#log').append(`
       <p id="logValue" style="color:${wlc}">
-        <span style="width:60px;padding-right:10px;text-align:center;">${betcount}</span>
+        <span class="betCountVal" style="width:60px;padding-right:10px;text-align:center;">${betcount}</span>
         <span class="logValueVal">
           Bal: ${bal}
         </span>
         <span class="logValueVal">
           Bet: ${bet}
         </span>
-        <span class="logValueVal" style="color:${wlc}">
+        <span id="profitValue" class="profitValue logValueVal">
           Profit: ${profit}
         </span>
       </p>
       `)
+      else betcount--
 
-      
+
 
       if (bal > highest) highest = bal
 
       if (bal <= 0) {
         bals.push(bal)
-        clearInterval(slowbetloop)      
+        clearInterval(slowbetloop)
         $('#log').append(`
           <p id="logValue">
-            <span class="logValueVal" style="color:lime">
+            <span id="highestVal" class="logValueVal">
               Highest Bal: ${highest}
             </span>
           </p>
       `)
+        setProfitColors()
       }
 
       /* console.log(`${betcount}, ${answer}, ${bet}, ${bal}, ${wins}, ${losses}, ${wlr}, ${highest}`) */
-      if(bet != 0) plotPoints(bals, highest)
+      if (bet != 0) plotPoints(bals, highest)
       displayAxis()
       //var element = document.getElementById("yourDivID");
       $('#log')[0].scrollTop = $('#log')[0].scrollHeight;
 
     }, 1);
     console.log(`${betcount}, ${answer}, ${bet}, ${bal}, ${wins}, ${losses}, ${wlr}, ${highest}`)
-    if(bet != 0) plotPoints(bals, highest)
+    if (bet != 0) plotPoints(bals, highest)
     displayAxis()
   }
 
   function sexyData() {
-    
+
   }
-/*   setInterval(() => {
-    while (!loopy) {
-      slowBet()
-      loopy = true
+  /*   setInterval(() => {
+      while (!loopy) {
+        slowBet()
+        loopy = true
+      }
+    }, 100); */
+
+  function setProfitColors() {
+    if (profitColors == 0) {
+      $('.logValueVal').css('color', 'white')
+      $('.profitValue').css('color', 'white')
+      $('#highestVal').css('color', 'white')
+      $('.betCountVal').css('color', 'white')
+    } else if (profitColors == 1) {
+      $('.logValueVal').css('color', 'white')
+      $('#highestVal').css('color', 'lime')
+      $('.betCountVal').css('color', 'white')
+      $('.profitValue').css('color', 'inherit')
+    } else {
+      $('.logValueVal').css('color', 'inherit')
+      $('.profitValue').css('color', 'inherit')
+      $('#highestVal').css('color', 'lime')
+      $('.betCountVal').css('color', 'inherit')
     }
-  }, 100); */
+    console.log(profitColors)
 
+  }
 
+  $('#option-run').on('click', event => {
+    slowBet()
 
-  slowBet()
+  })
+  $('#option-color').on('click', event => {
+    profitColors++
+    if (profitColors > 2) profitColors = 0
+    setProfitColors()
+  })
 
+  function sendMessage(msg) {
+    $('#message').html(msg)
+    setTimeout(() => {
+      $('#message').html("")
+    }, 5000);
+  }
+
+  function changeRounding(val) {
+    roundingExponent = val
+    sendMessage(`Rounding has been changed to ${roundingExponent} decimal places, run the simulation again for its effect to take place`)
+  }
+
+  $('#round0').on('click', event => {
+    changeRounding(0)
+  })
+  $('#round1').on('click', event => {
+    changeRounding(1)
+  })
+  $('#round2').on('click', event => {
+    changeRounding(2)
+  })
+  $('#round3').on('click', event => {
+    changeRounding(3)
+  })
+  $('#round4').on('click', event => {
+    changeRounding(4)
+  })
+  $('#round5').on('click', event => {
+    changeRounding(5)
+  })
+  $('#closeRounding').on('click', event => {
+    $('#roundingPopup').css('display', 'none')
+    roundingWindowClosed = true
+  })
+  $('#option-round').on('click', event => {
+    if (roundingWindowClosed) {
+      $('#roundingPopup').css('display', 'block')
+      roundingWindowClosed = false
+    } else {
+      $('#roundingPopup').css('display', 'none')
+      roundingWindowClosed = true
+    }
+  })
+  $('#option-modes').on('click', event => {
+    sendMessage('"Change Mode"  Coming Soon')
+  })
+  $('#option-info').on('click', event => {
+    sendMessage('"Information" Coming Soon')
+  })
   
 
 
 
-/*   function singraf() {
-    let a = []
-    for (let i = 0; i < 2 * Math.PI; i += 0.001) a.push((Math.tan(10*i)+1)/2)
-    return a
-  }
 
-  console.log(singraf())
 
-  plotPoints(singraf(), 1) */
+
+  /*   function singraf() {
+      let a = []
+      for (let i = 0; i < 2 * Math.PI; i += 0.001) a.push((Math.tan(10*i)+1)/2)
+      return a
+    }
+
+    console.log(singraf())
+
+    plotPoints(singraf(), 1) */
 
 })
