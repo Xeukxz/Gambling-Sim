@@ -5,7 +5,9 @@ $(() => {
   var ctx = c.getContext("2d");
   let profitColors = 1,
     roundingExponent = 2,
-    roundingWindowClosed = true
+    roundingWindowClosed = true,
+    modesWindowClosed = true,
+    mode = 'Default'
 
   function displayAxis() {
     ctx.strokeStyle = 'black'
@@ -48,6 +50,94 @@ $(() => {
 
   let wallet = 0,
     loopy = false
+
+  function quickBet() {
+    $('#log').html("")
+
+    let bal = 100,
+      bet = 0,
+      wins = 0,
+      losses = 0,
+      wlr = 0,
+      betcount = 0,
+      bals = [],
+      highest = 100,
+      loseStreak = 0,
+      lastbal = 100,
+      wlc = 'white'
+
+      while(bal > 0) {
+      answer = Math.floor(Math.random() * 2) + 1
+      betcount++
+      lastbal = bal
+      bals.push(bal)
+      bal -= bet
+      if (answer == 1) {
+        wlc = 'lime'
+        lastbal -= bet
+        wins++
+        bal += bet * 2
+        bet = bal * 0.02
+      } else {
+        wlc = 'red'
+        bet *= 3
+      }
+
+      bal = Math.round(bal * (10 ** roundingExponent))/10 ** roundingExponent
+
+      bet = Math.round(bet * (10 ** roundingExponent))/10 ** roundingExponent
+
+      profit = bal - lastbal
+
+      profit = Math.round(profit * (10 ** roundingExponent))/10 ** roundingExponent
+
+/*       if (bet != 0) $('#log').append(`
+      <p id="logValue" style="color:${wlc}">
+        <span class="betCountVal" style="width:60px;padding-right:10px;text-align:center;">${betcount}</span>
+        <span class="logValueVal">
+          Bal: ${bal}
+        </span>
+        <span class="logValueVal">
+          Bet: ${bet}
+        </span>
+        <span id="profitValue" class="profitValue logValueVal">
+          Profit: ${profit}
+        </span>
+      </p>
+      `)
+      else betcount-- */
+
+      if (bal > highest) highest = bal
+
+      if (bal <= 0) {
+        bals.push(bal)
+        $('#log').append(`
+          <p id="logValue">
+            <span id="highestVal" class="logValueVal">
+              Highest Bal: ${highest}
+            </span>
+          </p>
+      `)
+        setProfitColors()
+      }
+
+
+      /* console.log(`${betcount}, ${answer}, ${bet}, ${bal}, ${wins}, ${losses}, ${wlr}, ${highest}`) */
+      if (bet != 0) plotPoints(bals, highest)
+      displayAxis()
+      //var element = document.getElementById("yourDivID");
+      $('#log')[0].scrollTop = $('#log')[0].scrollHeight;
+
+    }
+    if (bet != 0) plotPoints(bals, highest)
+    displayAxis()
+    let data = {
+      highest: highest,
+      betcount: betcount,
+      bals: bals
+    }
+    return data
+  }
 
   function slowBet() {
 
@@ -201,7 +291,89 @@ $(() => {
   }
 
   $('#option-run').on('click', event => {
-    slowBet()
+    console.log(mode)
+    if(mode == 'Default') slowBet()
+    else if(mode == 'QuickRun') {
+      quickBet()
+      $('#log').append(`
+      <p style="text-align:center;">
+        <span style="color:red">
+          Logs removed for performance
+        </span>
+      </p>`)
+    } else if(mode == 'MultipleIterations') {
+      let iterations = []
+      let highestIteration = 0
+      let RunIterations = setInterval(() => {
+        let iteration = quickBet().highest
+        if (iteration > highestIteration) highestIteration = iteration
+        iterations.push(iteration)
+        plotPoints(iterations, highestIteration)
+        displayAxis()
+        if(iterations.length > 1000) {
+        clearInterval(RunIterations)
+        $('#log').html("")
+        for(let i in iterations) {
+          $('#log').append(`
+          <p id="logValue">
+            <span class="logValueVal" style="color:lime">
+              Bal: ${iterations[i]}
+            </span>
+          </p>`)
+        }
+        $('#log').append(`
+        <p style="text-align:center;">
+          <span style="color:lime">
+            Highest: ${highestIteration}
+          </span>
+        </p>`)
+        $('#log')[0].scrollTop = $('#log')[0].scrollHeight;
+        }
+      }, 1);
+    } else if(mode == 'Averages') {
+      let betcounts = []
+      let averages = []
+      let average = 0
+      let highestAverage = 0
+      let highestBetCount = 0
+      let runAverages = setInterval(() => {
+        let betcount = quickBet().betcount
+        betcounts.push(betcount)
+        let average = 0
+        for(let i in betcounts) {
+          average += betcounts[i]
+        }
+        average /= betcounts.length
+        if(betcount > highestBetCount) highestBetCount = betcount
+        if(average > highestAverage) highestAverage = average
+        averages.push(average)
+        plotPoints(averages, highestAverage)
+        displayAxis()
+        if(averages.length > 1000) {
+        clearInterval(runAverages)
+        $('#log').html("")
+        for(let i in averages) {
+          $('#log').append(`
+          <p id="logValue">
+          <span class="logValueVal" style="color:lime">
+            Average: ${averages[i]}
+          </span>
+          <span class="logValueVal" style="color:lime">
+            betcount: ${betcounts[i]}
+          </span>
+          </p>`)
+        }
+        $('#log').append(`
+        <p style="text-align:center;">
+          <span style="color:lime">
+            Highest Betcount: ${highestBetCount}
+          </span>
+        </p>`)
+        $('#log')[0].scrollTop = $('#log')[0].scrollHeight;
+        }
+
+      }, 1);
+    }
 
   })
   $('#option-color').on('click', event => {
@@ -218,6 +390,8 @@ $(() => {
   }
 
   function changeRounding(val) {
+    $('#roundingPopup').css('display', 'none')
+    roundingWindowClosed = true
     roundingExponent = val
     sendMessage(`Rounding has been changed to ${roundingExponent} decimal places, run the simulation again for its effect to take place`)
   }
@@ -248,18 +422,71 @@ $(() => {
     if (roundingWindowClosed) {
       $('#roundingPopup').css('display', 'block')
       roundingWindowClosed = false
+      $('#modesPopup').css('display', 'none')
+      modesWindowClosed = true
     } else {
       $('#roundingPopup').css('display', 'none')
       roundingWindowClosed = true
     }
   })
+
   $('#option-modes').on('click', event => {
-    sendMessage('"Change Mode"  Coming Soon')
+    if(modesWindowClosed) {
+      $('#modesPopup').css('display', 'block')
+      modesWindowClosed = false
+      $('#roundingPopup').css('display', 'none')
+      roundingWindowClosed = true
+    } else {
+      $('#modesPopup').css('display', 'none')
+      modesWindowClosed = true
+    }
   })
+
+  $('#mode-Default').on('click', event => {
+    mode = 'Default'
+    sendMessage('Mode set to "Default"')
+    $('#modesPopup').css('display', 'none')
+    modesWindowClosed = true
+  })
+
+  $('#mode-QuickRun').on('click', event => {
+    mode = 'QuickRun'
+    sendMessage('Mode set to "Quick Run"')
+    $('#modesPopup').css('display', 'none')
+    modesWindowClosed = true
+    
+  })
+
+  $('#mode-MultipleIterations').on('click', event => {
+    mode = 'MultipleIterations'
+    sendMessage('Mode set to "Multiple Iterations"')
+    $('#modesPopup').css('display', 'none')
+    modesWindowClosed = true
+    
+  })
+
+  $('#mode-Averages').on('click', event => {
+    mode = 'Averages'
+    sendMessage('Mode set to "Averages"')
+    $('#modesPopup').css('display', 'none')
+    modesWindowClosed = true
+    
+  })
+
+  $('#option-modeSettings').on('click', event => {
+    sendMessage('"Mode Settings" Coming Soon')
+  })
+
   $('#option-info').on('click', event => {
     sendMessage('"Information" Coming Soon')
   })
   
+/* 
+  mode-Default
+  mode-QuickRun
+  mode-MultipleIterations
+  mode-Averages
+ */
 
 
 
